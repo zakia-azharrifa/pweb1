@@ -1,0 +1,14 @@
+body {
+  background-color: rgb(255, 202, 202);
+}
+.paragraph-1 {
+  color: blue;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+}
+.paragraph-2,
+.paragraph-3 {
+  font-size: 24px;
+  color: rgb(108, 83, 249);
+}
