@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lowongan Kerja</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="text-center">Manajemen Lowongan Kerja</h2>
+      <form id="jobForm">
+        <div class="form-group">
+          <label for="jobTitle">Judul Pekerjaan:</label>
+          <input type="text" class="form-control" id="jobTitle" required />
+        </div>
+        <div class="form-group">
+          <label for="jobDesc">Deskripsi Pekerjaan:</label>
+          <textarea class="form-control" id="jobDesc" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="jobCompany">Perusahaan:</label>
+          <input type="text" class="form-control" id="jobCompany" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Tambah Lowongan</button>
+      </form>
+      <table class="table table-striped mt-4">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Judul</th>
+            <th>Deskripsi</th>
+            <th>Perusahaan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="jobTableBody">
+          <!-- Data akan dimuat di sini -->
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      const script_url = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+
+      function loadJobs() {
+        $.get(script_url, { action: "read" }, function (data) {
+          const tbody = $("#jobTableBody");
+          tbody.empty();
+          data.forEach((job) => {
+            tbody.append(`
+                        <tr>
+                            <td>${job.id}</td>
+                            <td>${job.title}</td>
+                            <td>${job.description}</td>
+                            <td>${job.company}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="updateJob(${job.id})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteJob(${job.id})">Hapus</button>
+                            </td>
+                        </tr>
+                    `);
+          });
+        });
+      }
+
+      $("#jobForm").on("submit", function (event) {
+        event.preventDefault();
+        const jobTitle = $("#jobTitle").val();
+        const jobDesc = $("#jobDesc").val();
+        const jobCompany = $("#jobCompany").val();
+        $.post(
+          script_url,
+          {
+            action: "insert",
+            title: jobTitle,
+            description: jobDesc,
+            company: jobCompany,
+          },
+          function (response) {
+            alert(response.result);
+            loadJobs();
+            $("#jobForm")[0].reset();
+          }
+        );
+      });
+
+      function deleteJob(id) {
+        if (confirm("Apakah anda yakin ingin menghapus lowongan ini?")) {
+          $.post(script_url, { action: "delete", id: id }, function (response) {
+            alert(response.result);
+            loadJobs();
+          });
+        }
+      }
+
+      function updateJob(id) {
+        const title = prompt("Judul Baru:");
+        const description = prompt("Deskripsi Baru:");
+        const company = prompt("Perusahaan Baru:");
+        if (title && description && company) {
+          $.post(
+            script_url,
+            {
+              action: "update",
+              id: id,
+              title: title,
+              description: description,
+              company: company,
+            },
+            function (response) {
+              alert(response.result);
+              loadJobs();
+            }
+          );
+        }
+      }
+
+      $(document).ready(function () {
+        loadJobs();
+      });
+    </script>
+  </body>
+</html>
